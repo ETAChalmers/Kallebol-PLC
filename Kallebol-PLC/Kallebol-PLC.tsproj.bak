@@ -1668,7 +1668,7 @@ External Setpoint Generation:
 		</Motion>
 		<Plc>
 			<Project GUID="{008F28E8-F090-4819-A8E3-071BBB40C036}" Name="Untitled1" PrjFilePath="Untitled1\Untitled1.plcproj" TmcFilePath="Untitled1\Untitled1.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="Untitled1\Untitled1.tmc" TmcHash="{769BE400-EFAD-BE3E-9EB3-49FE30F8277C}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="Untitled1\Untitled1.tmc" TmcHash="{A306927B-8CF0-4328-9780-5ECA5B500612}">
 					<Name>Untitled1 Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -1679,7 +1679,6 @@ External Setpoint Generation:
 						</Var>
 						<Var>
 							<Name>MAIN.Elevation.Error</Name>
-							<Comment><![CDATA[Data TO ADS]]></Comment>
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
@@ -1719,7 +1718,6 @@ External Setpoint Generation:
 						</Var>
 						<Var>
 							<Name>MAIN.Elevation.Enable</Name>
-							<Comment><![CDATA[Data FROM ADS]]></Comment>
 							<Type>BOOL</Type>
 						</Var>
 						<Var>

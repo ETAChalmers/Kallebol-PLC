@@ -1,0 +1,221 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="FB_Azimuth" Id="{cc65588d-8bb5-425f-a828-4833186d186a}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Azimuth
+VAR
+	
+	EnableAzimuth : BOOL := FALSE; //For ADS
+
+
+	Azimuth_Target_Position_Parabola : LREAL := 0; // for ADS, target position in 'real' angles
+	HMI_Azimuth : LREAL; //Readable position, scaled for your pleasure for ADS
+	
+	Azimuth_target_position : LREAL := 0; //in motor angles, 
+	
+	Azimuth_CurrentPosition : LREAL;
+	Azimuth_Old_position : LREAL;
+	Azimuth_Moveto_position :LREAL;
+	Azimuth_state : INT := 1;
+	Azimuth_enable_tracking : BOOL := FALSE;
+	Azimuth_setpoint_scaled: REAL;
+	Azimuth_actual_position : LREAL;
+	
+	Azimuth_axis : AXIS_REF; 
+	Azimuth_PowerAxis: MC_Power;
+	Azimuth_PowerAxisOut: ST_McOutputs;
+	Azimuth_MoveAxis: MC_MoveAbsolute;
+	Azimuth_MoveAbsoluteOut: ST_McOutputs;
+	Azimuth_ResetOut: ST_McOutputs;
+	
+
+	Azimuth_Axis_power : MC_Power;
+	Azimuth_axis_move_abs : MC_moveAbsolute;
+	Azimuth_Reset : MC_Reset;
+	
+	Azimuth_timer : TON; //Timer for init of Azimuth_axis
+END_VAR
+
+VAR CONSTANT
+	Azimuth_zero : REAL := 0; //'fake' zero position
+	Gearratio : REAL := 1/840;
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+IF EnableAzimuth = FALSE THEN
+	Azimuth_state := 0;
+END_IF
+
+IF EnableAzimuth = TRUE AND Azimuth_state = 0 THEN
+	Azimuth_state := 1;
+END_IF
+ 
+ update_Azimuth();]]></ST>
+    </Implementation>
+    <Method Name="update_Azimuth" Id="{2c547d4e-c4d7-43ce-b752-fd40bc10865d}">
+      <Declaration><![CDATA[METHOD update_Azimuth : BOOL
+VAR_INPUT
+END_VAR
+VAR CONSTANT
+	Invert_Azimuth_axis : BOOL := FALSE;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[Azimuth_axis();
+
+Azimuth_target_position := Azimuth_Target_Position_Parabola*gearratio;
+
+IF Invert_Azimuth_axis THEN
+	Azimuth_setpoint_scaled := Azimuth_target_position;
+	Azimuth_CurrentPosition := Azimuth_axis.NcToPlc.ActPos;
+	Azimuth_actual_position := Azimuth_axis.NcToPlc.ActPos - Azimuth_zero;
+	
+	Azimuth_Moveto_position := Azimuth_zero + Azimuth_target_position; 
+ELSE
+	Azimuth_setpoint_scaled := Azimuth_target_position;
+	Azimuth_CurrentPosition := Azimuth_axis.NcToPlc.ActPos;
+	Azimuth_actual_position := Azimuth_zero - Azimuth_axis.NcToPlc.ActPos;
+	
+	Azimuth_Moveto_position := Azimuth_zero - Azimuth_target_position; 
+
+END_IF
+CASE Azimuth_state OF
+	-1 : //Error state
+			IF Azimuth_axis.Status.Error THEN
+				Azimuth_state := 4;	(* axis error requires reset *)
+			ELSE
+				Azimuth_state := 1;	(* function block errors don't need a reset *)
+			END_IF
+		
+	0 : //Stopped
+			Azimuth_MoveAxis.Execute := FALSE;
+			Azimuth_PowerAxis.Enable := FALSE;
+			Azimuth_PowerAxis.Enable_Positive := FALSE;
+			Azimuth_PowerAxis.Enable_Negative := FALSE;
+	1 : //INIT
+			Azimuth_MoveAxis.Execute := FALSE;
+			Azimuth_Reset.Execute := FALSE;
+			Azimuth_state := 2;	
+			IF Azimuth_PowerAxis.Error THEN
+				Azimuth_state := -1;
+			END_IF
+	2 : //Enabled but not moving
+			Azimuth_PowerAxis.Enable := TRUE;
+			Azimuth_PowerAxis.Enable_Positive := TRUE;
+			Azimuth_PowerAxis.Enable_Negative := TRUE;
+			Azimuth_MoveAxis.BufferMode := MC_aborting;
+			IF EnableAzimuth AND Azimuth_axis.Status.Operational THEN
+				Azimuth_state := 33;
+				Azimuth_enable_tracking := TRUE;
+			END_IF
+			
+			IF Azimuth_PowerAxis.Error THEN
+				Azimuth_state := -1;
+			END_IF
+	
+	33 : //Tracking mode, tries to follow Azimuth value 
+
+		
+			//Pulse .Execute since movement is triggered on rising edge
+			IF Azimuth_MoveAxis.Execute THEN
+				Azimuth_MoveAxis.Execute := FALSE;
+			ELSE
+				//IF movements are large enough
+				IF ABS(Azimuth_Moveto_position - Azimuth_axis.NcToPlc.ActPos) > 0.04 OR ABS(Azimuth_Moveto_position - Azimuth_Old_position) > 0.04 THEN
+					Azimuth_Old_position := Azimuth_Moveto_position;
+					Azimuth_MoveAxis.Position := Azimuth_Moveto_position;
+					Azimuth_MoveAxis.Acceleration  := 40_000;
+					Azimuth_MoveAxis.Deceleration  := 40_000;
+					Azimuth_MoveAxis.Jerk 			:= 10_000;
+					Azimuth_MoveAxis.Velocity 		:= 1100;
+
+					Azimuth_MoveAxis.Execute 		:= TRUE;
+					
+				ELSE
+					Azimuth_MoveAxis.Execute := FALSE;
+				END_IF
+			END_IF
+
+			IF Azimuth_enable_tracking = FALSE THEN //If tracking is no longer desired
+				Azimuth_state := 2;
+			END_IF
+			IF Azimuth_MoveAxis.CommandAborted OR Azimuth_MoveAxis.Error OR Azimuth_axis.Status.Error THEN //Machine error
+				Azimuth_state := -1;
+			END_IF
+			
+	4: //Reset
+			Azimuth_Reset.Execute := TRUE;
+			IF Azimuth_Reset.Done THEN
+				Azimuth_state := 1;
+			ELSIF Azimuth_Reset.Error THEN
+				Azimuth_state := 1; 
+			END_IF
+
+END_CASE
+
+
+IF Invert_Azimuth_axis THEN
+	HMI_Azimuth := Azimuth_axis.NcToPlc.ActPos*gearratio - Azimuth_zero;
+ELSE
+	HMI_Azimuth := Azimuth_zero - Azimuth_axis.NcToPlc.ActPos*gearratio;
+
+END_IF
+
+Azimuth_Axis_power(		
+	Axis:=Azimuth_axis,
+	Enable:=Azimuth_PowerAxis.Enable,
+	Enable_positive:=Azimuth_PowerAxis.Enable_Positive,
+	Enable_negative:=Azimuth_PowerAxis.Enable_Negative,
+	Override:=100,
+	Status =>Azimuth_PowerAxisOut.done,
+	Busy=>Azimuth_PowerAxisOut.Busy,
+	Active=>Azimuth_PowerAxisOut.Active,
+	Error=>Azimuth_PowerAxisOut.Error,
+	ErrorID => Azimuth_PowerAxisOut.ErrorID
+);
+
+Azimuth_axis_move_abs(
+	Axis:=Azimuth_axis,
+	execute:=Azimuth_MoveAxis.Execute,
+	Position:=Azimuth_MoveAxis.Position,
+	Velocity:=Azimuth_MoveAxis.Velocity,
+	Acceleration:=Azimuth_MoveAxis.Acceleration,
+	Deceleration:=Azimuth_MoveAxis.Deceleration,
+	BufferMode:=Azimuth_MoveAxis.BufferMode,
+	Jerk:=Azimuth_MoveAxis.Jerk,
+	Done=>Azimuth_MoveAbsoluteOut.Done,
+	Busy=>Azimuth_MoveAbsoluteOut.Busy,
+	Active=>Azimuth_MoveAbsoluteOut.Active,
+	CommandAborted=>Azimuth_MoveAbsoluteOut.CommandAborted,
+	Error=>Azimuth_MoveAbsoluteOut.Error,
+	ErrorID=>Azimuth_MoveAbsoluteOut.ErrorID
+);
+
+Azimuth_Reset(
+	Axis:=Azimuth_axis,
+	Execute:=Azimuth_Reset.Execute,
+	Busy=>Azimuth_ResetOut.Busy,
+	Error=>Azimuth_ResetOut.Error,
+	ErrorID=>Azimuth_ResetOut.ErrorID
+);
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_Azimuth">
+      <LineId Id="70" Count="8" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Azimuth.update_Azimuth">
+      <LineId Id="6" Count="0" />
+      <LineId Id="199" Count="1" />
+      <LineId Id="7" Count="12" />
+      <LineId Id="193" Count="0" />
+      <LineId Id="20" Count="33" />
+      <LineId Id="71" Count="1" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="97" Count="40" />
+      <LineId Id="139" Count="41" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
