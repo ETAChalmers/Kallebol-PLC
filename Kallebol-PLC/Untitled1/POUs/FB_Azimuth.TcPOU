@@ -37,7 +37,7 @@ END_VAR
 
 VAR CONSTANT
 	Azimuth_zero : REAL := 0; //'fake' zero position
-	Gearratio : REAL := 1/840;
+	Gearratio : REAL := 0.0011904761904762;//1.0/840.0;
 
 END_VAR
 ]]></Declaration>
@@ -63,7 +63,7 @@ END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[Azimuth_axis();
 
-Azimuth_target_position := Azimuth_Target_Position_Parabola*gearratio;
+Azimuth_target_position := Azimuth_Target_Position_Parabola/gearratio;
 
 IF Invert_Azimuth_axis THEN
 	Azimuth_setpoint_scaled := Azimuth_target_position;
@@ -127,7 +127,7 @@ CASE Azimuth_state OF
 					Azimuth_MoveAxis.Acceleration  := 40_000;
 					Azimuth_MoveAxis.Deceleration  := 40_000;
 					Azimuth_MoveAxis.Jerk 			:= 10_000;
-					Azimuth_MoveAxis.Velocity 		:= 1100;
+					Azimuth_MoveAxis.Velocity 		:= 14000;
 
 					Azimuth_MoveAxis.Execute 		:= TRUE;
 					

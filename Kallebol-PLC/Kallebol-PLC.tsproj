@@ -1668,15 +1668,11 @@ External Setpoint Generation:
 		</Motion>
 		<Plc>
 			<Project GUID="{008F28E8-F090-4819-A8E3-071BBB40C036}" Name="Untitled1" PrjFilePath="Untitled1\Untitled1.plcproj" TmcFilePath="Untitled1\Untitled1.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="Untitled1\Untitled1.tmc" TmcHash="{769BE400-EFAD-BE3E-9EB3-49FE30F8277C}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="Untitled1\Untitled1.tmc" TmcHash="{FD6CD750-5B05-AFDB-3F97-30A4A08EA69D}">
 					<Name>Untitled1 Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
 						<Name>PlcTask Inputs</Name>
-						<Var>
-							<Name>MAIN.Azimuth.Azimuth_axis.NcToPlc</Name>
-							<Type GUID="{25521FAA-EA5F-4C7F-8864-BBCCDACD2E98}" Namespace="MC">NCTOPLC_AXIS_REF</Type>
-						</Var>
 						<Var>
 							<Name>MAIN.Elevation.Error</Name>
 							<Comment><![CDATA[Data TO ADS]]></Comment>
@@ -1710,13 +1706,13 @@ External Setpoint Generation:
 							<Name>MAIN.Elevation.Moving_negative</Name>
 							<Type>BOOL</Type>
 						</Var>
+						<Var>
+							<Name>MAIN.Azimuth.Azimuth_axis.NcToPlc</Name>
+							<Type GUID="{25521FAA-EA5F-4C7F-8864-BBCCDACD2E98}" Namespace="MC">NCTOPLC_AXIS_REF</Type>
+						</Var>
 					</Vars>
 					<Vars VarGrpType="2" AreaNo="1">
 						<Name>PlcTask Outputs</Name>
-						<Var>
-							<Name>MAIN.Azimuth.Azimuth_axis.PlcToNc</Name>
-							<Type GUID="{96B75FEB-2D84-43BE-A3EC-D9A681F27D52}" Namespace="MC">PLCTONC_AXIS_REF</Type>
-						</Var>
 						<Var>
 							<Name>MAIN.Elevation.Enable</Name>
 							<Comment><![CDATA[Data FROM ADS]]></Comment>
@@ -1740,6 +1736,10 @@ Data for ADS communtication END]]></Comment>
 						<Var>
 							<Name>MAIN.Elevation.Target_Position</Name>
 							<Type>UDINT</Type>
+						</Var>
+						<Var>
+							<Name>MAIN.Azimuth.Azimuth_axis.PlcToNc</Name>
+							<Type GUID="{96B75FEB-2D84-43BE-A3EC-D9A681F27D52}" Namespace="MC">PLCTONC_AXIS_REF</Type>
 						</Var>
 					</Vars>
 					<Contexts>
