@@ -3,7 +3,7 @@
   <Task Name="RS485task" Id="{686a5d12-461f-4ea7-a10a-9bef9e6fcf74}">
     <!--CycleTime in micro seconds.-->
     <CycleTime>1000</CycleTime>
-    <Priority>21</Priority>
+    <Priority>2</Priority>
     <PouCall>
       <Name>RS485_prg</Name>
     </PouCall>

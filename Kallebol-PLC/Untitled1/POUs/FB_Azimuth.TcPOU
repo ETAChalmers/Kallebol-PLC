@@ -66,13 +66,13 @@ END_VAR]]></Declaration>
 Azimuth_target_position := Azimuth_Target_Position_Parabola/gearratio;
 
 IF Invert_Azimuth_axis THEN
-	Azimuth_setpoint_scaled := Azimuth_target_position;
-	Azimuth_CurrentPosition := Azimuth_axis.NcToPlc.ActPos;
-	Azimuth_actual_position := Azimuth_axis.NcToPlc.ActPos - Azimuth_zero;
+	Azimuth_setpoint_scaled := LREAL_TO_REAL(Azimuth_target_position);
+	Azimuth_CurrentPosition := LREAL_TO_REAL(Azimuth_axis.NcToPlc.ActPos);
+	Azimuth_actual_position := LREAL_TO_REAL(Azimuth_axis.NcToPlc.ActPos - Azimuth_zero);
 	
 	Azimuth_Moveto_position := Azimuth_zero + Azimuth_target_position; 
 ELSE
-	Azimuth_setpoint_scaled := Azimuth_target_position;
+	Azimuth_setpoint_scaled := LREAL_TO_REAL(Azimuth_target_position);
 	Azimuth_CurrentPosition := Azimuth_axis.NcToPlc.ActPos;
 	Azimuth_actual_position := Azimuth_zero - Azimuth_axis.NcToPlc.ActPos;
 	

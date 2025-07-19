@@ -10,15 +10,19 @@ VAR
 	
 	//Data for ADS communtication
 	Targetpos_mm 			: LREAL	:= 0;		//Data FROM ADS
+	Targetpos_deg			: LREAL := 0;		//Data FROM ADS
 	Current_Position_mm 	: LREAL;			//Data TO ADS
+	Current_Position_deg 	: LREAL; 			//Data from inclonometer, updated asynchronous from RS485
 	Enable AT %Q* 			: BOOL 	:= FALSE;	//Data FROM ADS
 	Homeing 				: BOOL 	:= FALSE;	//Data TO ADS
 	Homeing_Error 			: BOOL 	:= FALSE;	//Data TO ADS
 	Homeing_Wrong_direction : BOOL  := FALSE;	//Data TO ADS
 	Reset_requested 		: BOOL  := FALSE;	//Data FROM ADS
 	Error AT %I* 			: BOOL;				//Data TO ADS
+	Target_in_deg			: BOOL  := FALSE;	//DATA FROM ADS
 	//Position_Error AT %I* 	: BOOL;
 	
+		
 	//Data for ADS communtication END
 	
 	
@@ -35,6 +39,11 @@ VAR
 	Set_Encoder AT %Q* : BOOL;
 	Encoder_Setvalue AT %Q* : UDINT;
 	Target_Position AT %Q* : UDINT;
+	
+	P_error : LREAL; //position error
+	Ang_P_fac : REAL := 0.01; //This is not really a P factor, I think it's more of a I
+ 	//Ang_I_fac : REAL := 0.001;
+
 	
 	//firstrun :BOOL := TRUE;
 	Homed : BOOL := FALSE;
@@ -70,7 +79,20 @@ IF Homed = FALSE AND Enable = TRUE AND Homeing_Allowed AND Homeing_Error = FALSE
 	Homeing_sequence();
 ELSE
 	IF Homed = TRUE AND Enable = TRUE THEN //Normal operation
-		Target_Position := mm_to_encoder(LIMIT(minmove_mm,targetpos_mm,maxmove_mm));
+		IF Target_in_deg = FALSE THEN
+			//'Dumb' positioning, semi-openloop the position is only based on the 
+			//Encoder value, not the actual measured value
+			Target_Position := mm_to_encoder(LIMIT(minmove_mm,targetpos_mm,maxmove_mm));
+		ELSE
+			//closed-loop positionin with a inclonometer in the loop
+			P_error := Current_Position_deg - Targetpos_deg;
+			Target_Position := mm_to_encoder(LIMIT(minmove_mm,
+			Target_Position + P_error*Ang_P_fac
+			,maxmove_mm));
+		END_IF
+	
+	
+		
 	END_IF
 END_IF
 
@@ -222,6 +244,16 @@ CASE Reset_state OF
 END_CASE]]></ST>
       </Implementation>
     </Method>
+    <Method Name="set_Current_Position_deg" Id="{fb76dbbc-70da-432a-8f48-a6f2fc32e312}">
+      <Declaration><![CDATA[METHOD set_Current_Position_deg : BOOL
+VAR_INPUT
+	deg : LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[Current_Position_deg := deg;]]></ST>
+      </Implementation>
+    </Method>
     <LineIds Name="FB_Elevation">
       <LineId Id="122" Count="3" />
       <LineId Id="120" Count="0" />
@@ -233,6 +265,15 @@ END_CASE]]></ST>
       <LineId Id="49" Count="0" />
       <LineId Id="46" Count="0" />
       <LineId Id="59" Count="0" />
+      <LineId Id="253" Count="0" />
+      <LineId Id="262" Count="1" />
+      <LineId Id="256" Count="0" />
+      <LineId Id="258" Count="1" />
+      <LineId Id="264" Count="0" />
+      <LineId Id="266" Count="0" />
+      <LineId Id="271" Count="1" />
+      <LineId Id="257" Count="0" />
+      <LineId Id="254" Count="1" />
       <LineId Id="72" Count="0" />
       <LineId Id="62" Count="0" />
       <LineId Id="194" Count="0" />
@@ -325,6 +366,9 @@ END_CASE]]></ST>
       <LineId Id="35" Count="0" />
       <LineId Id="20" Count="0" />
       <LineId Id="30" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Elevation.set_Current_Position_deg">
+      <LineId Id="5" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
