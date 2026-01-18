@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="MAIN" Id="{c126dce8-c39b-4cfd-9642-3394e5392cc2}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+Elevation : FB_Elevation;
+Azimuth : FB_Azimuth;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[Elevation();
+Azimuth();]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="11" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

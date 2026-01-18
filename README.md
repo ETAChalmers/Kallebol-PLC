@@ -1,7 +1,12 @@
-## Project och källkod till Kallebolens PLC
+### Project och källkod till Kallebolens PLC
+##Setup
+IDE TwinCAT 3 (TE1000 XAE Engineering) Installera via Beckhoff package manager. Senaste TwinCAT XAE kommer installeras då, för att komma åt 4024.X behövs "remote package manager". Kom ihåg att lägga till "Outdated feed" i package manager och starta TC i 32-bitars läge då 4024 inte stödjs av 64-bitars sytem längre.
 
-IDE TwinCAT 3 (TE1000 XAE Engineering) https://www.beckhoff.com/en-en/products/automation/twincat/
+Video som visar lite bra https://www.youtube.com/watch?v=BZZ_3WDMTG4
 
+XAE version 4024.66 (OBS ej 4026 då CX9020 inst stödjer högre runtime)
+
+##Syfte
 Projektets syfte är att driva Elevation och Azimith axlarna, Börvärdena kommer matas in via ADS in till PLCn som sedan kommer realisera dem.
 
 Elevation drivs med en EL7342 (endast en av två kanaler används) kopplat till en sunkigt linjärdon
@@ -9,6 +14,8 @@ Elevation drivs med en EL7342 (endast en av två kanaler används) kopplat till 
 Azimuth drivs med en AX5203 (endast en av två kanaler används) kopplat till en DFS-52L motor från SEW
 
 ## signaler till ADS
+För att någon axel skall funka skall "Enable" sickas till respektive mellan varje boot-up cykel
+
 
 Alla signaler i ADS börjar med _MAIN._ (då de ligger i MAIN tasket)
 

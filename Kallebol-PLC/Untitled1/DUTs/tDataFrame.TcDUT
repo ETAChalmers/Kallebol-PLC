@@ -1,6 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
-  <DUT Name="tDataFrame" Id="{39e45295-5cfd-4005-a928-9224403df0fa}">
-    <Declaration><![CDATA[TYPE tDataFrame : ARRAY[0..8] OF BYTE; END_TYPE]]></Declaration>
-  </DUT>
-</TcPlcObject>

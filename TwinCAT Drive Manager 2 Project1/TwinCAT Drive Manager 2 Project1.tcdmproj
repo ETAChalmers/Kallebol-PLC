@@ -3,15 +3,16 @@
   <PropertyGroup>
     <Name>Drive Manager 2</Name>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{979bc7b8-72ff-488c-8208-1132445445b8}</ProjectGuid>
-    <TcPath>
-    </TcPath>
+    <ProjectGuid>{f101ec4a-e87f-4659-9bc0-576159503ea7}</ProjectGuid>
+    <TcPath>..\Kallebol_PLC_\Kallebol_PLC_.tsproj</TcPath>
     <AssemblyName>TwinCAT Drive Manager 2 Project1</AssemblyName>
     <RootNamespace>TwinCAT Drive Manager 2 Project1</RootNamespace>
+    <SaveDriveDataAsFiles>False</SaveDriveDataAsFiles>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="Drive 4 %28AX5203-0000-0214%29.tcdmdrv">
       <SubType>Content</SubType>
+      <IoItemPathName>TIID^Device 1 (EtherCAT)^Drive 4 (AX5203-0000-0214)</IoItemPathName>
     </Content>
   </ItemGroup>
 </Project>
